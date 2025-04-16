@@ -8,7 +8,6 @@ def max_subarray_sum(nums):
     return max_sum
 
 
-# 测试示例
 nums1 = [1, -2, 3, 5, -1]
 nums2 = [1, -2, 3, -8, 5, 1]
 nums3 = [1, -2, 3, -2, 5, 1]
