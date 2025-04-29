@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Movies Found</h1>
+    <ul>
+    {% for movie in movies %}
+        <li>{{ movie.title }} ({{ movie.year }}) - Rating: {{ movie.rating_num }}</li>
+    {% endfor %}
+    </ul>
+    <a href="/search">New Search</a>
+</body>
+</html>
