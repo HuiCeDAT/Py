@@ -1,16 +1,22 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Please Sign In</title>
+    <title>Login</title>
 </head>
 <body>
-  {% if message %}
-  <p style="color:red">{{ message }}</p>
-  {% endif %}
-  <form action="/signin" method="post">
-    <legend>Please sign in:</legend>
-    <p><input name="username" placeholder="Username" value="{{ username }}"></p>
-    <p><input name="password" placeholder="Password" type="password"></p>
-    <p><button type="submit">Sign In</button></p>
-  </form>
+    <h1>Admin Login</h1>
+    {% if message %}
+        <p style="color: red;">{{ message }}</p>
+    {% endif %}
+    <form method="POST" action="/signin">
+        <p>
+            <input type="text" name="username" placeholder="Username" value="{{ username|default('') }}">
+        </p>
+        <p>
+            <input type="password" name="password" placeholder="Password">
+        </p>
+        <button type="submit">Sign In</button>
+    </form>
+    <a href="/">Back to Home</a>
 </body>
 </html>

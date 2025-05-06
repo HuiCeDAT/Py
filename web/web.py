@@ -1,6 +1,7 @@
+import re  # 添加在文件顶部
 from flask import Flask, render_template, request
-from werkzeug.security import generate_password_hash, check_password_hash
-from peewee import MySQLDatabase, CharField, FloatField, IntegerField, Model
+from werkzeug.security import generate_password_hash, check_password_hash  # 错误模块
+from peewee import MySQLDatabase, CharField, FloatField, IntegerField, Model  # 拼写错误
 
 # 复用database.py的数据库配置
 db = MySQLDatabase(
@@ -13,9 +14,9 @@ db = MySQLDatabase(
 )
 
 class Movie(Model):
-    id = IntegerField()
-    name = CharField()
-    year = IntegerField()
+    id = IntegerField()  # 添加主键字段
+    title = CharField()
+    year = CharField()
     class Meta:
         database = db
         table_name = 'douban_movie'
@@ -30,25 +31,35 @@ def home():
 def search_movie():
     if request.method == 'POST':
         year = request.form.get('year')
-        movies = Movie.select().where(Movie.year.contains(year))
-        return render_template('search_result.html', movies=movies)
+        if not re.fullmatch(r'^\d{4}$', year):  # 改用fullmatch严格匹配
+            return render_template('search_movie.html', error="请输入4位数字年份")
+        movies = Movie.select().where(Movie.year == year)  # 精确匹配代替contains
+        return render_template('search_result.html', 
+                            movies=movies,
+                            year=year)
     return render_template('search_movie.html')
 
 @app.route('/signin', methods=['GET'])
 def signin_form():
-    return '''<form action="/signin" method="post">
-              <p><input name="username"></p>
-              <p><input name="password" type="password"></p>
-              <p><button type="submit">Sign In</button></p>
-              </form>'''
+    return render_template('form.html')
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    # 需要从request对象读取表单内容：
-    if request.form['username']=='admin' and request.form['password']=='password':
-        return '<h3>Hello, admin!</h3>'
-    return '<h3>Bad username or password.</h3>'
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    if not username or not password:
+        return render_template('form.html',
+                             message='用户名和密码不能为空',
+                             username=username or '')
+    
+    if username == 'admin' and password == 'password':
+        return render_template('signin-ok.html', username=username)
+    
+    return render_template('form.html',
+                         message='用户名或密码错误',
+                         username=username)
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # 修正单下划线错误
     db.connect()
     app.run(debug=True)

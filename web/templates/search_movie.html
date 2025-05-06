@@ -1,12 +1,17 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Movie Search</title>
+    <title>Search Movies</title>
 </head>
 <body>
     <h1>Search Movies by Year</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
     <form method="POST">
-        <input type="text" name="year" placeholder="Enter year (e.g. 2023)">
+        <input type="text" name="year" placeholder="Enter release year (4 digits)" pattern="\d{4}">
         <button type="submit">Search</button>
     </form>
+    <a href="/">Back to Home</a>
 </body>
 </html>

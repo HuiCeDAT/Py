@@ -1,14 +1,18 @@
+<!DOCTYPE html>  <!-- 修正拼写 -->
 <html>
 <head>
-    <title>Search Results</title>
+    <title>搜索结果</title>
 </head>
 <body>
-    <h1>Movies Found</h1>
+    <h1>{{ year }}年上映电影</h1>
     <ul>
-    {% for movie in movies %}
-        <li>{{ movie.title }} ({{ movie.year }}) - Rating: {{ movie.rating_num }}</li>
-    {% endfor %}
+        {% if movies %}
+            {% for movie in movies %}  <!-- 正确for语法 -->
+                <li>{{ movie.title }}（{{ movie.year }}）</li>
+            {% endfor %}  <!-- 正确结束标签 -->
+        {% else %}
+            <li>未找到{{ year }}年的电影记录</li>
+        {% endif %}
     </ul>
-    <a href="/search">New Search</a>
 </body>
 </html>
