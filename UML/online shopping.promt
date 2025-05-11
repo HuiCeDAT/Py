@@ -1,0 +1,79 @@
+@startuml
+' 定义枚举类型
+enum OrderStatus {
+    CREATE
+    PAID
+    SHIPPING
+    DELIVERED
+    CANCEL
+}
+
+' 定义核心类
+class Customer {
+    - name: String
+    - contact: String
+    - deliveryAddress: String
+    - active: Boolean
+}
+
+class Order {
+    - createDate: Date
+    - status: OrderStatus
+}
+
+class OrderDetail {
+    - quantity: Integer
+    + calculateSubTotal(): Double
+    + calculateWeight(): Double
+}
+
+class Product {
+    - title: String
+    - weight: Double
+    - description: String
+    + getPriceForQuantity(quantity: Integer): Double
+    + getWeight(): Double
+}
+
+' 支付类继承结构
+abstract class Payment {
+    - amount: Double
+}
+
+class Credit {
+    - number: String
+    - type: String
+    - expireDate: Date
+}
+
+class Cash {
+    - cashTendered: Double
+}
+
+class WireTransfer {
+    - bankID: String
+    - bankName: String
+}
+
+class AliPay {
+    - number: String
+}
+
+class WeixinPay {
+    - number: String
+}
+
+' 定义类关系
+Customer "1" -- "*" Order : places >
+Order "1" -- "*" OrderDetail : contains >
+OrderDetail "*" -- "1" Product : includes >
+Order "1" -- "1" Payment : uses >
+
+' 支付方式继承关系
+Credit --|> Payment
+Cash --|> Payment
+WireTransfer --|> Payment
+AliPay --|> Payment
+WeixinPay --|> Payment
+
+@enduml
