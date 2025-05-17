@@ -1,0 +1,73 @@
+@startuml
+title 超市收银机 NextGen POS 系统用例图
+
+actor 收银员
+actor 顾客
+actor 系统管理员
+
+rectangle "核心销售流程" {
+    usecase "商品扫描" as UC1
+    usecase "现金支付" as UC2
+    usecase "数字支付" as UC3
+    usecase "支付处理" as UC4
+    usecase "库存更新" as UC5
+    usecase "凭证生成" as UC6
+}
+
+rectangle "异常处理" {
+    usecase "库存回滚" as UC7
+    usecase "订单状态复位" as UC8
+    usecase "异常熔断" as UC9
+}
+
+rectangle "系统管理" {
+    usecase "规则引擎配置" as UC10
+    usecase "离线模式管理" as UC11
+    usecase "系统配置" as UC12
+}
+
+rectangle "支付模块管理" {
+    usecase "硬件状态监控" as UC13
+    usecase "支付方式管理" as UC14
+}
+
+rectangle "第三方服务集成" {
+    usecase "库存管理对接" as UC15
+    usecase "税务计算对接" as UC16
+    usecase "财务系统对接" as UC17
+}
+
+UC1 --> UC4
+UC4 --> UC5
+UC4 --> UC6
+UC4 --> UC7
+UC7 --> UC8
+UC4 --> UC9
+UC9 --> UC7
+UC9 --> UC8
+UC10 --> UC1
+UC10 --> UC4
+UC11 --> UC1
+UC11 --> UC4
+UC13 --> UC2
+UC13 --> UC3
+UC14 --> UC2
+UC14 --> UC3
+UC15 --> UC5
+UC16 --> UC4
+UC17 --> UC4
+
+收银员 --> UC1
+收银员 --> UC2
+收银员 --> UC3
+顾客 --> UC2
+顾客 --> UC3
+系统管理员 --> UC10
+系统管理员 --> UC11
+系统管理员 --> UC12
+系统管理员 --> UC13
+系统管理员 --> UC14
+系统管理员 --> UC15
+系统管理员 --> UC16
+系统管理员 --> UC17
+@enduml
