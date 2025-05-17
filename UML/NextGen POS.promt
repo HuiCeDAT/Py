@@ -1,0 +1,158 @@
+' ======================
+' NextGen POS系统集成建模
+' ======================
+
+' 用例图（核心业务流程）
+@startuml(UseCase)
+left to right direction
+actor "收银员" as cashier
+actor "系统管理员" as admin
+actor "库存系统" as inventory
+actor "支付网关" as payment
+
+rectangle "NextGen POS" {
+  usecase "商品扫码录入" as UC1
+  usecase "动态定价计算" as UC2
+  usecase "混合支付处理" as UC3
+  usecase "离线交易缓存" as UC4
+  usecase "熔断恢复机制" as UC5
+  usecase "硬件状态监控" as UC6
+}
+
+cashier --> UC1 : 执行
+cashier --> UC3 : 发起
+UC1 --> UC2 : 触发\n«extend»促销规则
+UC3 --> payment : 异步通信
+UC4 --> inventory : 网络恢复后同步
+admin --> UC5 : 配置策略
+UC6 --> UC5 : 检测到故障
+@enduml
+
+' 类图（核心领域模型）
+@startuml(ClassDiagram)
+class Product <<Entity>> {
+  - barcode: String
+  - basePrice: Double
+  + getDynamicPrice(promotions): Double
+}
+
+class Order <<Aggregate Root>> {
+  - items: List<OrderItem>
+  - paymentMethods: Map<PaymentType, Double>
+  + calculateTotal(): Double
+  + applyPromotions(): void
+  + rollbackInventory(): void
+}
+
+class RuleEngine <<Service>> {
+  - validationRules: List<ValidationRule>
+  - pricingStrategies: List<PricingStrategy>
+  + validateProduct(product): boolean
+  + calculatePrice(context): Double
+}
+
+class PaymentProcessor <<Service>> {
+  - fallbackStrategy: LocalCache
+  + processPayment(order): TransactionResult
+  + retryOfflineTransactions(): void
+}
+
+class HardwareMonitor <<Service>> {
+  - deviceStatus: Map<DeviceType, Status>
+  + checkPrinterStatus(): boolean
+  + triggerAlarm(level: AlertLevel): void
+}
+
+Product "1" -- "*" OrderItem : 包含
+Order "1" o-- "*" PaymentType : 支付方式
+RuleEngine --> Product : 校验规则
+PaymentProcessor --> Order : 处理支付
+HardwareMonitor --> PaymentProcessor : 状态反馈
+@enduml
+
+' 活动图（熔断恢复流程）
+@startuml(ActivityDiagram)
+start
+:扫描商品;
+partition 支付异常处理 {
+  if (支付失败?) then (是)
+    :触发熔断机制;
+    fork
+      :回滚库存变更;
+    fork again
+      :复位订单状态;
+    end fork
+    while (网络未恢复?) 
+      :缓存离线数据;
+    endwhile
+    :同步云端数据;
+  else (否)
+    :完成交易流程;
+  endif
+}
+stop
+@enduml
+
+' 组件图（系统架构）
+@startuml(ComponentDiagram)
+component "POS终端" {
+  [商品扫描模块] as scan
+  [规则引擎] as engine
+  [支付处理器] as payment
+  [硬件监控] as hw
+}
+
+component "外部服务" {
+  [库存管理] as inv
+  [税务计算] as tax
+  [财务系统] as fin
+}
+
+scan --> engine : 商品数据流
+engine --> payment : 定价结果
+payment --> inv : 库存更新
+payment --> tax : 实时计税
+payment --> fin : 交易记录
+
+hw --> [打印机] : 状态检测
+hw --> [扫码枪] : 心跳监控
+
+cloud {
+  component "云端同步" as cloud {
+    [事务日志] 
+    [缓存队列]
+  }
+}
+
+payment ..> cloud : 断网时缓存
+@enduml
+
+' 状态图（交易状态机）
+@startuml(StateDiagram)
+state "交易生命周期" as main {
+  [*] --> Idle : 初始状态
+  Idle --> Scanning : 扫码开始
+  Scanning --> Calculating : 完成扫码
+  Calculating --> Paying : 确认金额
+  
+  state Paying {
+    [*] --> Cash
+    Cash --> Completed : 现金足额
+    Cash --> ChangeDue : 需要找零
+    
+    [*] --> Digital
+    Digital --> Processing : 发起请求
+    Processing --> Completed : 支付成功
+    Processing --> Failed : 认证失败
+  }
+  
+  Completed --> [*] : 结束交易
+  Failed --> Rollback : 触发回滚
+}
+
+state Rollback {
+  [*] --> InventoryRollback
+  InventoryRollback --> OrderReset
+  OrderReset --> [*]
+}
+@enduml
