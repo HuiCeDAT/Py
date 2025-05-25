@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login Successful</title>
-</head>
-<body>
-    <h1>Welcome, {{ username }}!</h1>
-    <p>You have successfully logged in.</p>
-    <a href="/">Back to Home</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex flex-column align-items-center justify-content-center">
+        <img src="https://img.icons8.com/ios-filled/100/ffffff/checked--v1.png" alt="成功图标" class="mb-4" style="opacity:0.8;">
+        <h2 class="mb-3">欢迎回来, {{ username }}!</h2>
+        <p class="lead mb-4">登录成功</p>
+        <div class="d-flex gap-3">
+            <a href="{{ url_for('movie.movie_list') }}" class="btn btn-primary">浏览电影</a>
+            <a href="{{ url_for('home') }}" class="btn btn-outline-light">返回首页</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex flex-column align-items-center mb-4">
+        <img src="https://img.icons8.com/ios-filled/100/ffffff/hearts.png" alt="我的收藏" class="mb-2" style="opacity:0.8;">
+        <h2 class="mb-1" style="font-weight:700;letter-spacing:1px;">我的收藏</h2>
+        <p class="text-secondary">这里收藏着你喜欢的所有电影</p>
+    </div>
+
+    {% if movies %}
+    <div class="row">
+        {% for movie in movies %}
+        <div class="col-md-4 mb-4">
+            <div class="card position-relative">
+                <button 
+                    class="collection-btn collected"
+                    onclick="toggleCollection(this, {{ movie.id }})"
+                    data-movie-id="{{ movie.id }}"
+                >
+                    <i class="fas fa-heart"></i> 已收藏
+                </button>
+                <img src="{{ movie.pic }}" class="card-img-top" alt="{{ movie.title }}"
+                     onerror="this.onerror=null;this.src='https://placehold.co/200x280?text=Image+Not+Found';">
+                <div class="card-body">
+                    <h5 class="card-title">{{ movie.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">{{ movie.year }}</small><br>
+                        <small class="text-muted">{{ movie.category }}</small><br>
+                        <small class="text-muted">导演：{{ movie.directors }}</small>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">{{ movie.rating_num }}分</span>
+                        <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="btn btn-outline-light btn-sm">详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center mt-5">
+        <p class="lead">你还没有收藏任何电影</p>
+        <a href="{{ url_for('movie_list') }}" class="btn btn-primary mt-3">去发现电影</a>
+    </div>
+    {% endif %}
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<script>
+function toggleCollection(btn, movieId) {
+    fetch('/collection/remove/' + movieId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 移除整个卡片
+            btn.closest('.col-md-4').remove();
+            
+            // 如果没有更多电影，显示空状态
+            if (document.querySelectorAll('.card').length === 0) {
+                const emptyState = `
+                    <div class="text-center mt-5">
+                        <p class="lead">你还没有收藏任何电影</p>
+                        <a href="{{ url_for('movie_list') }}" class="btn btn-primary mt-3">去发现电影</a>
+                    </div>
+                `;
+                document.querySelector('.row').innerHTML = emptyState;
+            }
+            
+            // 显示成功消息
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+            toast.style.zIndex = '1000';
+            toast.textContent = data.message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+        toast.style.zIndex = '1000';
+        toast.textContent = '操作失败，请重试';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    });
+}
+</script>
+
+<style>
+.collection-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    transition: all 0.3s ease;
+}
+.collection-btn:hover {
+    background: rgba(0,0,0,0.8);
+}
+.collection-btn.collected {
+    background: #0071e3;
+}
+.collection-btn.collected:hover {
+    background: #005bb5;
+}
+</style>
+{% endblock %}

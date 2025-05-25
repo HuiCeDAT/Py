@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>用户登录</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="mb-3">
+            <input type="text" class="form-control" name="username" placeholder="用户名" required>
+        </div>
+        <div class="mb-3">
+            <input type="password" class="form-control" name="password" placeholder="密码" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">登录</button>
+    </form>
+    <p class="mt-3">还没有账号？<a href="{{ url_for('auth.register') }}">立即注册</a></p>
+</div>
+{% endblock %}

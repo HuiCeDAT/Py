@@ -3,21 +3,22 @@
 {% block content %}
 <div class="container mt-5">
     <div class="d-flex flex-column align-items-center">
-        <h2 class="mb-4">管理员登录</h2>
+        <h2 class="mb-4">用户注册</h2>
         {% if message %}
             <div class="alert alert-danger">{{ message }}</div>
         {% endif %}
         <div class="col-md-6">
-            <form method="POST" action="{{ url_for('login') }}" class="card p-4">
+            <form method="POST" action="{{ url_for('register') }}" class="card p-4">
                 <div class="mb-3">
-                    <input type="text" class="form-control" name="username" placeholder="用户名" value="{{ username|default('') }}" required>
+                    <input type="text" class="form-control" name="username" placeholder="用户名" required>
                 </div>
                 <div class="mb-3">
                     <input type="password" class="form-control" name="password" placeholder="密码" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">登录</button>
+                <button type="submit" class="btn btn-success w-100">注册</button>
             </form>
             <div class="text-center mt-3">
+                <p>已有账号？<a href="{{ url_for('login') }}">立即登录</a></p>
                 <a href="{{ url_for('home') }}" class="btn btn-link">返回首页</a>
             </div>
         </div>

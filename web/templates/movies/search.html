@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>电影搜索</h2>
+    <form method="POST" action="{{ url_for('movies.search') }}">
+        <div class="form-group">
+            <label>上映年份</label>
+            <input type="text" name="year" class="form-control" 
+                   pattern="\d{4}" title="请输入4位数字年份">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+    </form>
+</div>
+{% endblock %}

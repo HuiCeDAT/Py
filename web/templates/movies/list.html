@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}电影列表{% endblock %}
+
+{% block head %}
+<style>
+.collection-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    transition: all 0.3s ease;
+}
+.collection-btn:hover {
+    background: rgba(0,0,0,0.8);
+}
+.collection-btn.collected {
+    background: #0071e3;
+}
+.collection-btn.collected:hover {
+    background: #005bb5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center mb-4">
+  <img src="https://img.icons8.com/ios-filled/100/ffffff/clapperboard.png" alt="电影列表" class="mb-2" style="opacity:0.8;">
+  <h2 class="mb-1" style="font-weight:700;letter-spacing:1px;">电影列表</h2>
+  <p class="text-secondary">发现并收藏你喜欢的电影</p>
+</div>
+
+<div class="row justify-content-center">
+  {% for movie in movies %}
+  <div class="col-md-4 mb-4">
+    <div class="card position-relative">
+      {% if current_user.is_authenticated %}
+      <button 
+        class="collection-btn {% if movie.id in collected_movies %}collected{% endif %}"
+        onclick="toggleCollection(this, {{ movie.id }})"
+        data-movie-id="{{ movie.id }}"
+      >
+        {% if movie.id in collected_movies %}
+        <i class="fas fa-heart"></i> 已收藏
+        {% else %}
+        <i class="far fa-heart"></i> 收藏
+        {% endif %}
+      </button>
+      {% endif %}
+      <img src="{{ movie.pic }}" class="card-img-top" alt="{{ movie.title }}" 
+           onerror="this.onerror=null;this.src='https://placehold.co/200x280?text=Image+Not+Found';">
+      <div class="card-body">
+        <h5 class="card-title">{{ movie.title }}</h5>
+        <p class="card-text">
+          <small class="text-muted">{{ movie.year }}</small><br>
+          <small class="text-muted">{{ movie.category }}</small><br>
+          <small class="text-muted">导演：{{ movie.directors }}</small>
+        </p>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge bg-primary">{{ movie.rating_num }}分</span>
+          <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="btn btn-outline-light btn-sm">详情</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<script>
+function toggleCollection(btn, movieId) {
+  const isCollected = btn.classList.contains('collected');
+  const url = isCollected ? '/collection/remove/' : '/collection/add/';
+  
+  fetch(url + movieId, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      btn.classList.toggle('collected');
+      btn.innerHTML = isCollected ? 
+        '<i class="far fa-heart"></i> 收藏' : 
+        '<i class="fas fa-heart"></i> 已收藏';
+      // 显示成功消息
+      const toast = document.createElement('div');
+      toast.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+      toast.style.zIndex = '1000';
+      toast.textContent = data.message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    // 显示错误消息
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+    toast.style.zIndex = '1000';
+    toast.textContent = '操作失败，请重试';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  });
+}
+</script>
+{% endblock %}
